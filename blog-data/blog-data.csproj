@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>blog_data</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\blog-dataHelper\blog-dataHelper.csproj" />
+    <ProjectReference Include="..\blog-models\blog-models.csproj" />
+  </ItemGroup>
+
+</Project>

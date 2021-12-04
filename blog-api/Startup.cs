@@ -1,3 +1,10 @@
+using blog_api.Extensions;
+using blog_business.Abstractions;
+using blog_business.Concretions;
+using blog_data.Abstractions;
+using blog_data.Concretions;
+using blog_dataHelper.Abstractions;
+using blog_dataHelper.Concretions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -31,6 +38,17 @@ namespace blog_api
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "blog_api", Version = "v1" });
+            });
+
+            //DEBT: Extract these to a separate method
+            services.AddScoped<ISideNavFacade, SideNavFacade>();
+            services.AddScoped<ITopicService, TopicService>();
+            services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IAbstractDB, AbstractMySqlDB>();
+
+            services.ConfigureDb(options =>
+            {
+                options.ConnectionString = Configuration.GetConnectionString("DevConnection");
             });
         }
 
