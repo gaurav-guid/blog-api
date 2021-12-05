@@ -1,6 +1,7 @@
 ﻿using blog_data.Abstractions;
 using blog_dataHelper.Abstractions;
 using blog_models.SideNav;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -22,12 +23,12 @@ namespace blog_data.Concretions
             List<Topic> topics = new List<Topic>();
             string sql = @"
 SELECT
-BIN_TO_UUID(top_id), top_name, top_top_id, top_cat_id
+BIN_TO_UUID(top_id) AS top_id, top_name, BIN_TO_UUID(top_top_id) AS top_top_id, BIN_TO_UUID(top_cat_id) AS top_cat_id
 FROM ct_topic
-WHERE top_cat_id = UUID_TO_BIN('@categoryId')";
-            Dictionary<string, KeyValuePair<SqlDbType, object>> parameters = new Dictionary<string, KeyValuePair<SqlDbType, object>>
+WHERE top_cat_id = UUID_TO_BIN(@categoryId)";
+            Dictionary<string, KeyValuePair<MySqlDbType, object>> parameters = new Dictionary<string, KeyValuePair<MySqlDbType, object>>
             {
-                { "@categoryId", new KeyValuePair<SqlDbType, object>(SqlDbType.UniqueIdentifier, categoryId) }
+                { "@categoryId", new KeyValuePair<MySqlDbType, object>(MySqlDbType.Guid, categoryId) }
             };
 
             var ds = _abstractDB.GetDataSet(sql, parameters);
@@ -36,12 +37,14 @@ WHERE top_cat_id = UUID_TO_BIN('@categoryId')";
 
             foreach (DataRow row in ds.Tables[0].Rows)
             {
+                Guid parsedParentTopic = Guid.Empty;
+                Guid parsedCategoryId = Guid.Empty;
                 Topic topic = new Topic()
                 {
-                    Id = row.Field<Guid>("top_id"),
+                    Id = Guid.Parse(row.Field<string>("top_id")),
                     Name = row.Field<string>("top_name"),
-                    ParentTopic = row.Field<Guid>("top_top_id"),
-                    CategoryId = row.Field<Guid>("top_cat_id"),
+                    ParentTopic = Guid.TryParse(row.Field<string>("top_top_id"), out parsedParentTopic) ? parsedParentTopic : parsedParentTopic,
+                    CategoryId = Guid.TryParse(row.Field<string>("top_cat_id"), out parsedCategoryId) ? parsedCategoryId : parsedCategoryId,
                 };
                 topics.Add(topic);
             }

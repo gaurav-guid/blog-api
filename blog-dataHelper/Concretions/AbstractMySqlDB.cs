@@ -1,4 +1,5 @@
 ﻿using blog_dataHelper.Abstractions;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -13,16 +14,16 @@ namespace blog_dataHelper.Concretions
     public class AbstractMySqlDB : IAbstractDB
     {
         //DEBT: BLOCKER: the way we are currently establishing connection with DB is for MS SQL. It does not work with MySQL.
-        public DataSet GetDataSet(string command, Dictionary<string, KeyValuePair<SqlDbType, object>> parameters)
+        public DataSet GetDataSet(string command, Dictionary<string, KeyValuePair<MySqlDbType, object>> parameters)
         {
             try
             {
                 DataSet ds = new DataSet();
-                using (SqlConnection con = new SqlConnection(DBConfigurer.ConnectionString))
+                using (var con = new MySqlConnection(DBConfigurer.ConnectionString))
                 {
-                    SqlCommand cmd = new SqlCommand(command, con);
+                    var cmd = new MySqlCommand(command, con);
                     cmd.Parameters.AddRange(DictionaryToSqlParameterList(parameters));
-                    DataAdapter da = new SqlDataAdapter(cmd);
+                    DataAdapter da = new MySqlDataAdapter(cmd);
                     da.Fill(ds);
                 }
                 return ds;
@@ -33,25 +34,25 @@ namespace blog_dataHelper.Concretions
             }
         }
 
-        private SqlParameter[] DictionaryToSqlParameterList(Dictionary<string, KeyValuePair<SqlDbType, object>> parameters)
+        private MySqlParameter[] DictionaryToSqlParameterList(Dictionary<string, KeyValuePair<MySqlDbType, object>> parameters)
         {
 
-            SqlParameter[] sqlParameters = new SqlParameter[parameters.Count];
+            MySqlParameter[] mySqlParameters = new MySqlParameter[parameters.Count];
             int index = 0;
             foreach (var parameter in parameters)
             {
-                SqlParameter sqlParameter = new SqlParameter(parameter.Key, parameter.Value.Key);
+                MySqlParameter mySqlParameter = new MySqlParameter(parameter.Key, parameter.Value.Key);
 
                 //DEBT: I think we do not need this casting, as parameter.Value is itseld of type object
-                //if (param.Value.Key.Equals(SqlDbType.Int))
+                //if (param.Value.Key.Equals(MySqlDbType.Int))
                 //{
                 //    parameter.Value 
                 //}
 
-                sqlParameter.Value = parameter.Value.Value;
-                sqlParameters[index++] = sqlParameter;
+                mySqlParameter.Value = parameter.Value.Value;
+                mySqlParameters[index++] = mySqlParameter;
             }
-            return sqlParameters;
+            return mySqlParameters;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MySqlConnector;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -9,6 +10,6 @@ namespace blog_dataHelper.Abstractions
 {
     public interface IAbstractDB
     {
-        DataSet GetDataSet(string command, Dictionary<string, KeyValuePair<SqlDbType, Object>> parameters);
+        DataSet GetDataSet(string command, Dictionary<string, KeyValuePair<MySqlDbType, Object>> parameters);
     }
 }
